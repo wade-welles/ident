@@ -26,12 +26,12 @@ for explanation purposes we present it as a series of bytes.
 ```
 The components of the first 64-bits are as follows
 
-| Start Bit | Stop Bit | Name | Description                                                             |
-|-----------|----------|------|-------------------------------------------------------------------------|
-| 0         | 15       | ID   | Cluster-wide unique ID of for the  process.                             |
-| 16        | 31       | Seq  | Sequence number in the set of identifiers generated within this second. |
-| 32        | 63       | Time | The time in seconds since epoch that this identifier was generated.     |
-| 64        | 95       | Rand | A random 32 bit number generated in-process.                            |
+| Start Bit | Stop Bit | Name | Description                                                                |
+|-----------|----------|------|----------------------------------------------------------------------------|
+| 0         | 15       | ID   | Cluster-wide unique ID of the generating process.                          |
+| 16        | 31       | Seq  | Sequence number in the set of identifiers generated in the current second. |
+| 32        | 63       | Time | The time in seconds since epoch that this identifier was generated.        |
+| 64        | 95       | Rand | A random 32 bit number generated in-process.                               |
 
 This is all wrapped up behind an HTTP interface to make it easy to generate new
 identifiers with.
