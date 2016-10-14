@@ -1,0 +1,6 @@
+# development artifacts
+*.sw[onp]
+/scripts
+
+# build artifacts
+/ident

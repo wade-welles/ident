@@ -1,0 +1,102 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "Provision the relevant DynamoDB resources for the ident service",
+  "Parameters": {
+    "Environment": {
+      "Description" : "Name of the environment to assign to tags.",
+      "Type": "String",
+      "Default": ""
+    },
+
+    "TableName" : {
+      "Description" : "Name of the table to provision.",
+      "Type" : "String",
+      "Default" : ""
+    },
+
+    "AccountID" : {
+      "Description" : "AWS Account ID to provision this under.",
+      "Type" : "String",
+      "Default" : ""
+    }
+  },
+
+  "Outputs": {
+    "AccessKeyId": {
+      "Description" : "The provisioned access key to get at this table.",
+      "Value" :  { "Ref": "AccessKey" }
+    },
+    "SecretAccessKey": {
+      "Description" : "The provisioned secret access key to get at this table.",
+      "Value" :  { "Fn::GetAtt": ["AccessKey", "SecretAccessKey"] }
+    }
+  },
+
+  "Resources" : {
+    "Table": {
+      "Type" : "AWS::DynamoDB::Table",
+      "Properties" : {
+        "TableName": { "Ref": "TableName" },
+        "AttributeDefinitions" : [
+          {
+            "AttributeName": "cluster",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema" : [
+          {
+            "AttributeName": "cluster",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 1
+        }
+      }
+    },
+
+    "User": {
+      "Type": "AWS::IAM::User",
+      "Properties": {
+      }
+    },
+
+    "Policy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "IdentWriter",
+        "PolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "dynamodb:UpdateItem"
+              ],
+              "Resource":  { "Fn::Join" :  [ "",
+                  [
+                    "arn:aws:dynamodb:",
+                    { "Ref" : "AWS::Region" },
+                    ":",
+                    { "Ref" : "AccountID" },
+                    ":table/",
+                    { "Ref" : "Table" }
+                  ]
+                ]
+              }
+            }
+          ]
+        },
+        "Users": [{ "Ref": "User" }]
+      }
+    },
+
+    "AccessKey" : {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": { "Ref": "User" }
+      }
+    }
+  }
+}
