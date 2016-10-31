@@ -1,10 +1,10 @@
-package main
+package dynamodb
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
+	db "github.com/aws/aws-sdk-go/service/dynamodb"
 	"math"
 	"os"
 	"strconv"
@@ -12,24 +12,29 @@ import (
 
 type Key map[string]interface{}
 
+type Counter struct {
+	Cluster string `json:"cluster"`
+	Seq     uint16 `json:"seq"`
+}
+
 type Table struct {
 	Name string
-	svc  *dynamodb.DynamoDB
+	svc  *db.DynamoDB
 }
 
 func (t Table) Increment(c *Counter) error {
 	// We lean on UpdateItem to increment the counter in an atomic way. DynamoDB
 	// takes care of that for us.
-	out, err := t.svc.UpdateItem(&dynamodb.UpdateItemInput{
-		Key: map[string]*dynamodb.AttributeValue{
-			"cluster": &dynamodb.AttributeValue{
+	out, err := t.svc.UpdateItem(&db.UpdateItemInput{
+		Key: map[string]*db.AttributeValue{
+			"cluster": &db.AttributeValue{
 				S: aws.String(c.Cluster),
 			},
 		},
-		AttributeUpdates: map[string]*dynamodb.AttributeValueUpdate{
-			"seq": &dynamodb.AttributeValueUpdate{
+		AttributeUpdates: map[string]*db.AttributeValueUpdate{
+			"seq": &db.AttributeValueUpdate{
 				Action: aws.String("ADD"),
-				Value: &dynamodb.AttributeValue{
+				Value: &db.AttributeValue{
 					N: aws.String("1"),
 				},
 			},
@@ -78,6 +83,6 @@ func NewTable(name string) *Table {
 		WithCredentials(credentials)
 
 	sess := session.New(config)
-	svc := dynamodb.New(sess)
+	svc := db.New(sess)
 	return &Table{name, svc}
 }

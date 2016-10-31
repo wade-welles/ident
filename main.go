@@ -1,21 +1,12 @@
 package main
 
 import (
+	"github.com/reflect/ident/idgen"
+	"github.com/reflect/ident/source/dynamodb"
+
 	"flag"
-	"math/rand"
 	"net/http"
-	"time"
 )
-
-func init() {
-	rand.Seed(time.Now().Unix())
-}
-
-func Run(h *Handler, ch chan string) {
-	for {
-		ch <- h.generateToken()
-	}
-}
 
 func main() {
 	var (
@@ -25,13 +16,14 @@ func main() {
 
 	flag.Parse()
 
-	id := MustID(*clusterName, *tableName)
+	source := dynamodb.New(*clusterName, *tableName)
+	provider := idgen.NewProvider(source)
 
-	logInfo("starting ident v%s (id: %d)", Version, id)
+	logInfo("starting ident v%s (id: %d)", Version, provider.Id)
 
 	server := http.Server{
 		Addr:    ":8081",
-		Handler: NewHandler(id),
+		Handler: NewHandler(provider),
 	}
 
 	server.ListenAndServe()
