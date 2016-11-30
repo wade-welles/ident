@@ -37,5 +37,5 @@ func encode(id uint16, time uint32, seq uint16, suffix uint32) string {
 	prefix |= (uint64(seq) << 32)
 	prefix |= uint64(time)
 
-	return base64.URLEncoding.EncodeToString(append(dumpUint64(prefix), dumpUint32(suffix)...))
+	return base64.RawURLEncoding.EncodeToString(append(dumpUint64(prefix), dumpUint32(suffix)...))
 }

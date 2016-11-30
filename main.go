@@ -17,7 +17,10 @@ func main() {
 	flag.Parse()
 
 	source := dynamodb.New(*clusterName, *tableName)
-	provider := idgen.NewProvider(source)
+	provider, err := idgen.NewProvider(source)
+	if err != nil {
+		panic(err)
+	}
 
 	logInfo("starting ident v%s (id: %d)", Version, provider.Id)
 

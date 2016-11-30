@@ -43,14 +43,19 @@ func (p *Provider) Close() error {
 	return nil
 }
 
-func NewProvider(src source.Source) *Provider {
+func NewProvider(src source.Source) (*Provider, error) {
+	id, err := src.NextID()
+	if err != nil {
+		return nil, err
+	}
+
 	p := &Provider{
-		Id: source.MustID(src),
+		Id: id,
 
 		ch:     make(chan struct{}),
 		ticker: time.NewTicker(1 * time.Second),
 	}
 	go p.resetSeq()
 
-	return p
+	return p, nil
 }
